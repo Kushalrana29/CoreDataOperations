@@ -10,7 +10,8 @@ import CoreData
 
 class UserLoginViewController: UIViewController {
     
-   
+    //MARK: - IBOutlets
+    
     @IBOutlet weak var firstNameLabel: UILabel!
     @IBOutlet weak var lastNameLabel: UILabel!
     @IBOutlet weak var emailLabel: UILabel!
@@ -27,16 +28,26 @@ class UserLoginViewController: UIViewController {
     
     @IBOutlet weak var loginButton: UIButton!
     
+    
+    //MARK: - Properties
+    
+    
+    
+    //MARK: - View Life cycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
     }
+    
 
+    //MARK: - @IBAction
+    
     @IBAction func loginButton(_ sender: Any) {
     if firstNameTextField.text != "" && lastNameTextField.text != "" && emailTextField.text != "" && passwordTextField.text != "" && addressTextField.text != "" && pincodeTextField.text != "" {
        
+        // optional binding
         if let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = emailTextField.text, let password = passwordTextField.text, let  pincode = pincodeTextField.text, let  address = addressTextField.text {
                 
-                saveValuesInDatabase (firstName: firstName , lastName: lastName , email: email , password: password , address: address , pincode: pincode)
+            saveValuesInDatabase (firstName: firstName , lastName: lastName , email: email , password: password , address: address , pincode: pincode)
             
             firstNameTextField.text = ""
             lastNameTextField.text = ""
@@ -44,7 +55,6 @@ class UserLoginViewController: UIViewController {
             passwordTextField.text = ""
             addressTextField.text = ""
             pincodeTextField.text = ""
-            
             }
     }
     else {
@@ -57,14 +67,17 @@ class UserLoginViewController: UIViewController {
     }
 }
     
+    
+    //MARK: -  Save Values in Core Data
+    
     func saveValuesInDatabase (firstName: String, lastName: String, email: String, password: String, address: String, pincode:String) {
         
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        
         let context = appDelegate.persistentContainer.viewContext
         
         let entity = NSEntityDescription.entity(forEntityName: "UserDetails", in: context)
         
+        // optiona binding
         if let entity = entity {
             
             let newUser = NSManagedObject(entity: entity, insertInto: context)

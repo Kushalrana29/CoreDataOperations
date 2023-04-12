@@ -10,36 +10,50 @@ import CoreData
 
 class UserDetailsViewController: UIViewController {
 
+    //MARK: - IBOutlets
+    
     @IBOutlet weak var detailsTableView: UITableView!
+    
+    
+    //MARK: - Properties
     
     var detailsArray = [AnyObject]()
     
+    
+    //MARK: - Viewlife cycle methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchData()
+        fetchDataFromDB()
+        
         detailsTableView.delegate = self
         detailsTableView.dataSource = self
     }
     
-    func fetchData (){
-        
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
-        
+    
+    
+    //MARK: - fectch Data from core data
+    
+    func fetchDataFromDB (){
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "UserDetails")
         request.returnsObjectsAsFaults = false
         
         do{
-            let result = try context.fetch(request)
+            let result = try delegateConext().1.fetch(request)
             detailsArray = result
+            
             DispatchQueue.main.async {
                 self.detailsTableView.reloadData()
             }
-        }catch{
-            
+        } catch {
+            print("Not saved:  getting error")
         }
     }
 }
+
+ 
+//MARK: - UITableViewDelegate, UITableViewDataSource
+
 extension UserDetailsViewController : UITableViewDelegate , UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -61,24 +75,18 @@ extension UserDetailsViewController : UITableViewDelegate , UITableViewDataSourc
         cell.addressLabel.text = (detailsArray[indexPath.row].value(forKey: "address")as! String)
         cell.pincodeLabel.text = (detailsArray[indexPath.row].value(forKey: "pincode")as! String)
         
-        
-        
         return cell
-        
     }
     
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         switch editingStyle {
         case .delete:
-            let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
-            let context:NSManagedObjectContext = appDel.persistentContainer.viewContext
-            
-            context.delete(detailsArray[indexPath.row] as! NSManagedObject)
+            delegateConext().1.delete(detailsArray[indexPath.row] as! NSManagedObject)
             detailsArray.remove(at: indexPath.row)
             self.detailsTableView.reloadData()
             do {
-                try context.save()
+                try delegateConext().1.save()
                 } catch let error as NSError {
                     print(error)
                 }
@@ -87,35 +95,10 @@ extension UserDetailsViewController : UITableViewDelegate , UITableViewDataSourc
         }
     }
     
-    
-//
-//     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCell.EditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-//            switch editingStyle {
-//            case .delete:
-//                // remove the deleted item from the model
-//                let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
-//                let context:NSManagedObjectContext = appDel.persistentContainer.viewContext
-//
-//                context.delete(detailsArray[indexPath.row] as! NSManagedObject)
-//                detailsArray.remove(at: indexPath.row)
-//
-////                do{
-////                    try context.save()
-////                    }
-////                }catch{
-////
-////                }
-//
-//
-//
-//               //tableView.reloadData()
-//                // remove the deleted item from the `UITableView`
-//              //  self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-//            default:
-//                return
-//
-//            }
-    //}
-    
+    func delegateConext() -> (AppDelegate, NSManagedObjectContext) {
+        let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context:NSManagedObjectContext = appDel.persistentContainer.viewContext
+        return (appDel, context)
+    }
     
 }
